@@ -110,7 +110,20 @@ def magnify_image(image, factor):
 
     return magnified_image
 
-# Example usage
+def generate_difference_image(image1, image2):
+    # Ensure that the two images have the same shape
+    if image1.shape != image2.shape:
+        raise ValueError("Both images must have the same dimensions.")
+    
+    # Calculate the absolute difference between the two images
+    difference_image = np.abs(image1.astype(np.int16) - image2.astype(np.int16))
+
+    # Clip the values to the valid range [0, 255] and convert to uint8
+    difference_image = np.clip(difference_image, 0, 255).astype(np.uint8)
+
+    return difference_image
+
+
 image_path = "image.png"
 index_no = "200522F"
 image = load_image(image_path)
@@ -131,3 +144,7 @@ for i, level_image in enumerate(pyramid_images):
 # Magnify the third level of the pyramid (25% scale) by a factor of 4
 magnified_image = magnify_image(pyramid_images[2], 4)
 save_image(magnified_image, f"{index_no}_mag.png")
+
+# Genarate difference image of the original image and the magnified image
+difference_image = generate_difference_image(gray_image, magnified_image)
+save_image(difference_image, f"{index_no}_diff.png")
