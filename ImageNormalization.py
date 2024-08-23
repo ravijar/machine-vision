@@ -51,6 +51,26 @@ def rotate_image(image, angle):
 
     return rotated_image
 
+def downsample_image(image):
+    height, width = image.shape[:2]
+    new_height, new_width = height // 2, width // 2
+
+    # Reduce the image size by a factor of 2
+    downsampled_image = image[:new_height*2:2, :new_width*2:2] // 4
+    downsampled_image += image[1:new_height*2:2, :new_width*2:2] // 4
+    downsampled_image += image[:new_height*2:2, 1:new_width*2:2] // 4
+    downsampled_image += image[1:new_height*2:2, 1:new_width*2:2] // 4
+
+    return downsampled_image
+
+def generate_image_pyramid(image, levels=5):
+    pyramid_images = [image]
+    for i in range(1, levels):
+        image = downsample_image(image)
+        pyramid_images.append(image)
+    return pyramid_images
+
+# Example usage
 image_path = "image.png"
 index_no = "200522F"
 image = load_image(image_path)
@@ -62,3 +82,8 @@ save_image(gray_image, f"{index_no}_org.png")
 # Rotate the grayscale image by 45 degrees
 rotated_image = rotate_image(gray_image, 45)
 save_image(rotated_image, f"{index_no}_rotated.png")
+
+# Generate image pyramid with 5 levels
+pyramid_images = generate_image_pyramid(gray_image)
+for i, level_image in enumerate(pyramid_images):
+    save_image(level_image, f"{index_no}_pyramid_{i+1}.png")
