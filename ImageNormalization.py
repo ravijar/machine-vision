@@ -10,6 +10,9 @@ def load_image(image_path):
 def save_image(image, image_path):
     cv2.imwrite(image_path, image)
 
+def convert_to_grayscale(image):
+    return cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+
 def rotate_image(image, angle):
     # Convert angle to radians
     theta = np.radians(angle)
@@ -48,9 +51,14 @@ def rotate_image(image, angle):
 
     return rotated_image
 
-image_path = "image.png"  # replace with your actual image path
+image_path = "image.png"
+index_no = "200522F"
 image = load_image(image_path)
 
-rotated_image = rotate_image(image, 45)
+# Convert to grayscale
+gray_image = convert_to_grayscale(image)
+save_image(gray_image, f"{index_no}_org.png")
 
-save_image(rotated_image, "rotated_image.png")
+# Rotate the grayscale image by 45 degrees
+rotated_image = rotate_image(gray_image, 45)
+save_image(rotated_image, f"{index_no}_rotated.png")
