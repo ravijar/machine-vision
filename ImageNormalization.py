@@ -70,6 +70,46 @@ def generate_image_pyramid(image, levels=5):
         pyramid_images.append(image)
     return pyramid_images
 
+def magnify_image(image, factor):
+    height, width = image.shape[:2]
+    new_height = int(height * factor)
+    new_width = int(width * factor)
+    
+    # Resize the image using bilinear interpolation
+    magnified_image = np.zeros((new_height, new_width), dtype=np.float32)
+    
+    for i in range(new_height):
+        for j in range(new_width):
+            # Map coordinates to original image
+            x = j / factor
+            y = i / factor
+
+            # Get the coordinates of the four surrounding pixels
+            x1 = int(x)
+            y1 = int(y)
+            x2 = min(x1 + 1, width - 1)
+            y2 = min(y1 + 1, height - 1)
+
+            # Calculate the fractional parts
+            fx = x - x1
+            fy = y - y1
+
+            # Perform bilinear interpolation
+            top_left = float(image[y1, x1])
+            top_right = float(image[y1, x2])
+            bottom_left = float(image[y2, x1])
+            bottom_right = float(image[y2, x2])
+
+            top = top_left + (top_right - top_left) * fx
+            bottom = bottom_left + (bottom_right - bottom_left) * fx
+
+            magnified_image[i, j] = top + (bottom - top) * fy
+
+    # Clip values to range [0, 255] and convert back to uint8
+    magnified_image = np.clip(magnified_image, 0, 255).astype(np.uint8)
+
+    return magnified_image
+
 # Example usage
 image_path = "image.png"
 index_no = "200522F"
@@ -87,3 +127,7 @@ save_image(rotated_image, f"{index_no}_rotated.png")
 pyramid_images = generate_image_pyramid(gray_image)
 for i, level_image in enumerate(pyramid_images):
     save_image(level_image, f"{index_no}_pyramid_{i+1}.png")
+
+# Magnify the third level of the pyramid (25% scale) by a factor of 4
+magnified_image = magnify_image(pyramid_images[2], 4)
+save_image(magnified_image, f"{index_no}_mag.png")
